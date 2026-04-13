@@ -201,7 +201,11 @@ async def get_library_artists(
 
     def _get_library_artists() -> list[dict[str, Any]]:
         ytm = ytmusicapi.YTMusic(auth=headers, language=language, user=user)
-        artists = ytm.get_library_subscriptions(limit=9999)
+        artists = (
+            ytm.get_library_subscriptions(limit=9999)
+            + ytm.get_library_artists(limit=9999)
+            + ytm.get_library_upload_artists(limit=9999)
+        )
         # Sync properties with uniformal artist object
         for artist in artists:
             artist["id"] = artist["browseId"]
@@ -220,7 +224,7 @@ async def get_library_albums(
 
     def _get_library_albums() -> list[dict[str, Any]]:
         ytm = ytmusicapi.YTMusic(auth=headers, language=language, user=user)
-        return ytm.get_library_albums(limit=9999)
+        return ytm.get_library_albums(limit=9999) + ytm.get_library_upload_albums(limit=9999)
 
     return await _run_ytmusic(_get_library_albums)
 
@@ -250,7 +254,7 @@ async def get_library_tracks(
 
     def _get_library_tracks() -> list[dict[str, Any]]:
         ytm = ytmusicapi.YTMusic(auth=headers, language=language, user=user)
-        return ytm.get_library_songs(limit=9999)
+        return ytm.get_library_songs(limit=9999) + ytm.get_library_upload_songs(limit=9999)
 
     return await _run_ytmusic(_get_library_tracks)
 
