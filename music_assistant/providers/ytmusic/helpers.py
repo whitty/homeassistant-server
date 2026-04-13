@@ -181,7 +181,7 @@ async def get_library_albums(
 
     def _get_library_albums():
         ytm = ytmusicapi.YTMusic(auth=headers, language=language, user=user)
-        return ytm.get_library_albums(limit=9999)
+        return ytm.get_library_albums(limit=9999) + ytm.get_library_upload_albums(limit=9999)
 
     return await asyncio.to_thread(_get_library_albums)
 
