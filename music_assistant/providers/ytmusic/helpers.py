@@ -169,7 +169,16 @@ async def get_library_artists(
             artist["name"] = artist["artist"]
             del artist["browseId"]
             del artist["artist"]
-        return artists
+
+        upload_artists = ytm.get_library_upload_artists(limit=9999)
+        logging.getLogger("music_assistant").getChild("YouTube Music").error("GW: upload_artists=%s", repr(upload_artists))
+        for artist in upload_artists:
+            artist["id"] = artist["browseId"]
+            artist["name"] = artist["artist"]
+            del artist["browseId"]
+            del artist["artist"]
+
+        return artists + upload_artists
 
     return await asyncio.to_thread(_get_library_artists)
 
