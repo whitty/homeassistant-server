@@ -9,6 +9,7 @@ This also nicely separates the parsing logic from the Youtube Music provider log
 import asyncio
 from http.cookies import SimpleCookie
 from time import time
+import logging
 
 import ytmusicapi
 
@@ -53,7 +54,8 @@ async def get_album(headers: dict[str, str], prov_album_id: str, language: str =
             # points to the videoId of the original version, while we want the album version
             try:
                 album_playlist = ytm.get_playlist(playlistId=album["audioPlaylistId"], limit=None)
-            except ytmusicapi.YTMusicError:
+            except ytmusicapi.YTMusicError as e:
+                logging.getLogger("music_assistant").getChild("YouTube Music").error("Failed lookaside audioPlaylistId: '%s': %s", album["audioPlaylistId"], e)
                 return album
 
             # Do some basic checks
