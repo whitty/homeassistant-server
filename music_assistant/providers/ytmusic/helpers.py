@@ -53,7 +53,7 @@ async def get_album(headers: dict[str, str], prov_album_id: str, language: str =
             # points to the videoId of the original version, while we want the album version
             try:
                 album_playlist = ytm.get_playlist(playlistId=album["audioPlaylistId"], limit=None)
-            except:
+            except ytmusicapi.YTMusicError:
                 return album
 
             # Do some basic checks
