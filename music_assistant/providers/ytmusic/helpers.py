@@ -211,7 +211,7 @@ async def get_library_tracks(
 
     def _get_library_tracks():
         ytm = ytmusicapi.YTMusic(auth=headers, language=language, user=user)
-        return ytm.get_library_songs(limit=9999)
+        return ytm.get_library_songs(limit=9999) + ytm.get_library_upload_songs(limit=9999)
 
     return await asyncio.to_thread(_get_library_tracks)
 
