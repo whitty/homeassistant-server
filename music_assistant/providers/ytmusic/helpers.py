@@ -12,6 +12,7 @@ from collections.abc import Callable
 from http.cookies import SimpleCookie
 from time import time
 from typing import Any, Literal
+import logging
 
 import ytmusicapi
 from music_assistant_models.errors import LoginFailed
@@ -174,14 +175,22 @@ async def get_library_artists(
     def _get_library_artists() -> list[dict[str, Any]]:
         ytm = ytmusicapi.YTMusic(auth=headers, language=language, user=user)
 
+        library_subscriptions = ytm.get_library_subscriptions(limit=9999)
+
+        library_artists = ytm.get_library_artists(limit=9999)
+        logging.getLogger("music_assistant").getChild("YouTube Music").error("GW: library_artists=%s", repr(library_artists))
+
+        upload_artists = ytm.get_library_upload_artists(limit=9999)
+        logging.getLogger("music_assistant").getChild("YouTube Music").error("GW: upload_artists=%s", repr(upload_artists))
+
         artists = []
         # Avoid duplicate ids from overlapping sources
         seen_ids = set()
 
         for artist in (
-            ytm.get_library_subscriptions(limit=9999)
-            + ytm.get_library_artists(limit=9999)
-            + ytm.get_library_upload_artists(limit=9999)
+            library_subscriptions
+            + library_artists
+            + upload_artists
         ):
             # Sync properties with uniformal artist object
             artist["id"] = artist["browseId"].removeprefix("MPLA")
