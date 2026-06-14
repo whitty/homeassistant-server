@@ -12,6 +12,7 @@ from collections.abc import Callable
 from http.cookies import SimpleCookie
 from time import time
 from typing import Any, Literal
+import logging
 
 import ytmusicapi
 from music_assistant_models.errors import LoginFailed
@@ -183,8 +184,10 @@ async def get_library_artists(
         library_artists = ytm.get_library_artists(limit=9999)
         for artist in library_artists:
             artist["browseId"] = artist["browseId"].removeprefix("MPLA")
+        logging.getLogger("music_assistant").getChild("YouTube Music").error("GW: library_artists=%s", repr(library_artists))
 
         library_upload_artists = ytm.get_library_upload_artists(limit=9999)
+        logging.getLogger("music_assistant").getChild("YouTube Music").error("GW: upload_artists=%s", repr(library_upload_artists))
 
         for artist in (
             library_subscriptions

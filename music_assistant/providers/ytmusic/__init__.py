@@ -12,6 +12,7 @@ from datetime import datetime
 from io import StringIO
 from typing import TYPE_CHECKING, Any, cast
 from urllib.parse import parse_qs, unquote, urlparse
+from pprint import pformat
 
 from aiohttp import ClientError
 from duration_parser import parse as parse_str_duration
@@ -888,6 +889,7 @@ class YoutubeMusicProvider(RecommendationPayloadMixin, MusicProvider):
         album_id = album_id or album_obj.get("id") or album_obj.get("browseId")
 
         if not album_id:
+            self.logger.debug("GW _parse_album %s not album_id", repr(album_obj))
             raise InvalidDataError("Album ID is required but not found")
 
         if "title" in album_obj:
@@ -896,15 +898,25 @@ class YoutubeMusicProvider(RecommendationPayloadMixin, MusicProvider):
             name, version = parse_title_and_version(album_obj["name"])
         else:
             name, version = "", ""
+
+        print(f"name={name} id={album_id} audioPlaylistId={album_obj['audioPlaylistId']} {album_obj.keys()}")
+        if "bsolution" in name:
+            self.logger.debug("GW _parse_album \"%s\" '%s'", name, repr(album_obj))
+        if "Hottest" in name:
+            self.logger.debug("GW _parse_album \"%s\" '%s'", name, repr(album_obj))
+
         album = Album(
             item_id=album_id,
             name=name,
             version=version,
+            # ID
             provider=self.instance_id,
             provider_mappings={
                 ProviderMapping(
                     item_id=str(album_id),
+                    # domain
                     provider_domain=self.domain,
+                    # ID
                     provider_instance=self.instance_id,
                     url=f"{YTM_DOMAIN}/playlist?list={album_obj.get('audioPlaylistId')}",
                 )
@@ -914,14 +926,17 @@ class YoutubeMusicProvider(RecommendationPayloadMixin, MusicProvider):
         if album_obj.get("year") and album_obj["year"].isdigit():
             album.year = album_obj["year"]
         if "thumbnails" in album_obj:
+            # parse thumbnails
             album.metadata.images = UniqueList(self._parse_thumbnails(album_obj["thumbnails"]))
         if description := album_obj.get("description"):
             album.metadata.description = unquote(description)
         if "isExplicit" in album_obj:
             album.metadata.explicit = album_obj["isExplicit"]
         if "artists" in album_obj:
+            print("album_obj['artists'] %s" % repr(album_obj["artists"]))
             album.artists = UniqueList(
                 [
+                    # Artist-item mapping
                     self._get_artist_item_mapping(artist)
                     for artist in album_obj["artists"]
                     if _artist_is_resolvable(artist)
