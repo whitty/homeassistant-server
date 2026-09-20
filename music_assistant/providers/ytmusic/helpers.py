@@ -206,13 +206,21 @@ async def get_library_artists(
         # Avoid duplicate ids from overlapping sources
         seen_ids = set()
 
+        library_subscriptions = ytm.get_library_subscriptions(limit=9999)
+
+        library_artists = ytm.get_library_artists(limit=9999)
+        for artist in library_artists:
+            artist["browseId"] = artist["browseId"].removeprefix("MPLA")
+
+        library_upload_artists = ytm.get_library_upload_artists(limit=9999)
+
         for artist in (
-            ytm.get_library_subscriptions(limit=9999)
-            + ytm.get_library_artists(limit=9999)
-            + ytm.get_library_upload_artists(limit=9999)
+            library_subscriptions
+            + library_artists
+            + library_upload_artists
         ):
             # Sync properties with uniformal artist object
-            artist["id"] = artist["browseId"].removeprefix("MPLA")
+            artist["id"] = artist["browseId"]
             artist["name"] = artist["artist"]
             del artist["browseId"]
             del artist["artist"]
